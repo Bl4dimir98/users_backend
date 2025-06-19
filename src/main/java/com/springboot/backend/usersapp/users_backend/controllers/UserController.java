@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.backend.usersapp.users_backend.entities.User;
+import com.springboot.backend.usersapp.users_backend.models.UserRequest;
 import com.springboot.backend.usersapp.users_backend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -65,21 +66,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@Valid @RequestBody User user, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> update(@Valid @RequestBody UserRequest user, BindingResult result, @PathVariable Long id) {
         if (result.hasErrors()) {
             return validation(result);
         }
 
-        Optional<User> userOptional = userService.findById(id);
+        Optional<User> userOptional = userService.update(user, id);
 
         if (userOptional.isPresent()) {
-            User userDb = userOptional.get();
-            userDb.setEmail(user.getEmail());
-            userDb.setName(user.getName());
-            userDb.setLastname(user.getLastname());
-            userDb.setUsername(user.getUsername());
-            userDb.setPassword(user.getPassword());
-            return ResponseEntity.ok(userService.save(userDb));
+            return ResponseEntity.ok(userOptional.orElseThrow());
         }
         return ResponseEntity.notFound().build();
     }
